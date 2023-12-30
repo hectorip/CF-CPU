@@ -1,6 +1,6 @@
 # Ejercicios
 
-Codifica los siguientes instrucciones en el lenguaje que en el que hayas hecho tu CPU y ejecúta el programa.
+Codifica los siguientes instrucciones en el lenguaje que en el que hayas hecho tu CPU y ejecuta el programa.
 
 ## Ejercicio: suma de dos números
 

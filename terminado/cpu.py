@@ -142,4 +142,15 @@ code = [
     ("HALT",),
 ]
 
+code = [
+    ('CONST', 'Ra', 11),
+    ('CONST', 'Rb', 1),
+    ('CONST', 'Rc', 0),
+    ('CONST', 'Rd', 4), # Dirección en donde empieza el bucle
+    ('CMP', '<=', 'Rb', 'Ra', 'Rd'),
+    ('ADD', 'Rb', 'Rc', 'Rc'),
+    ('JMP', 'Rd', 0),
+    ('HALT')
+]
+
 print(machine.run(code))

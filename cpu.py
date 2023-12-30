@@ -35,5 +35,14 @@ class CPU:
 
 machine = CPU()
 code = [("CONST", 10, "Ra"), ("CONST", 20, "Rb"), ("ADD", "Ra", "Rb", "Rc"), ("HALT")]
-
+# code = [
+#     ('CONST', 'Ra', 11),
+#     ('CONST', 'Rb', 1),
+#     ('CONST', 'Rc', 0),
+#     ('CONST', 'Rd', 4), # Dirección en donde empieza el bucle
+#     ('CMP', '<=', 'Rb', 'Ra', 'Rd'),
+#     ('ADD', 'Rb', 'Rc', 'Rc'),
+#     ('JMP', 'Rd', 0),
+#     ('HALT')
+# ]
 machine.run(code)
