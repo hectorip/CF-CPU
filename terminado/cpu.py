@@ -11,6 +11,7 @@
 # ('LOAD', 'Rs', 'Rd', offset)  # Simulando nuestra RAM
 # ('STORE', 'Rs', 'Rd', offset)  # Simulando nuestra RAM
 # ('JMP', 'Rd', offset)  # Mueve el IP a la dirección de memoria
+# ('JZ', 'Ra', 'Rb')  # Mueve el IP a la dirección de memoria a Ra si el resultado de Rb es 0
 # ('HALT')
 
 
@@ -29,6 +30,7 @@ class CPU:
 
         # Para Pythonistas:
         # self.registers = {f"R{a}": 0 for a in ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']]}
+        
         self.memory = [0] * 1024  # 1024 bytes
 
         # Instruction Pointer, en qué instrucción vamos
@@ -40,7 +42,7 @@ class CPU:
         while True:
             # Obtener la instrucción actual
             instruction = program[self.registers["IP"]]
-            print(instruction)
+            print("executing ", instruction)
 
             # Incrementar el IP
             self.registers["IP"] += 1
@@ -71,6 +73,8 @@ class CPU:
                 self.STORE(instruction[1], instruction[2], instruction[3])
             elif name == "JMP":
                 self.JMP(instruction[1], instruction[2])
+            elif name == "JZ":
+                self.JZ(instruction[1], instruction[2])
             elif name == "HALT":
                 self.HALT()
                 break
@@ -104,17 +108,17 @@ class CPU:
 
     def CMP(self, op, arg1, arg2, result):
         if op == "<":
-            self.registers[result] = self.registers[arg1] < self.registers[arg2]
+            self.registers[result] = int(self.registers[arg1] < self.registers[arg2])
         elif op == ">":
-            self.registers[result] = self.registers[arg1] > self.registers[arg2]
+            self.registers[result] = int(self.registers[arg1] > self.registers[arg2])
         elif op == "<=":
-            self.registers[result] = self.registers[arg1] <= self.registers[arg2]
+            self.registers[result] = int(self.registers[arg1] <= self.registers[arg2])
         elif op == ">=":
-            self.registers[result] = self.registers[arg1] >= self.registers[arg2]
+            self.registers[result] = int(self.registers[arg1] >= self.registers[arg2])
         elif op == "==":
-            self.registers[result] = self.registers[arg1] == self.registers[arg2]
+            self.registers[result] = int(self.registers[arg1] == self.registers[arg2])
         elif op == "!=":
-            self.registers[result] = self.registers[arg1] != self.registers[arg2]
+            self.registers[result] = int(self.registers[arg1] != self.registers[arg2])
         else:
             raise Exception("Operador no soportado")
 
@@ -122,13 +126,18 @@ class CPU:
         self.registers[arg1] = value
 
     def LOAD(self, rs, rd, offset):
-        self.registers[rd] = self.memory[rs + offset]
+        self.registers[rd] = self.memory[self.registers[rs  ] + offset]
 
     def STORE(self, rs, rd, offset):
-        self.memory[rs + offset] = self.registers[rd]
+        self.memory[self.registers[rs] + offset] = self.registers[rd]
 
     def JMP(self, arg1, offset):
         self.registers["IP"] = self.registers[arg1] + offset
+    
+    def JZ(self, arg1, arg2):
+        if not self.registers[arg2]:
+            print("Jumping to ", self.registers[arg1])
+            self.registers["IP"] = self.registers[arg1]
 
     def HALT(self):
         print("El programa ha terminado")
@@ -142,15 +151,55 @@ code = [
     ("HALT",),
 ]
 
+
+# Suma del 1 al 10
 code = [
-    ('CONST', 'Ra', 11),
-    ('CONST', 'Rb', 1),
-    ('CONST', 'Rc', 0),
-    ('CONST', 'Rd', 4), # Dirección en donde empieza el bucle
-    ('CMP', '<=', 'Rb', 'Ra', 'Rd'),
+    ('CONST', 10, 'Ra'),
+    ('CONST', 1, 'Rb'), # Contador
+    ('CONST', 1, 'Rf'), # Incremento
+    ('CONST', 0, 'Rc'),
+    ('CONST', 5, 'Rd'), # Dirección en donde empieza el bucle
+    ('CMP', '>=', 'Rb', 'Ra', 'Re'),
     ('ADD', 'Rb', 'Rc', 'Rc'),
-    ('JMP', 'Rd', 0),
-    ('HALT')
+    ('ADD', 'Rb', 'Rf', 'Rb'),
+    ('JZ', 'Rd', 'Re'),
+    ('HALT',)
 ]
+
+# Factorial
+code = [
+    ('CONST', 5, 'Ra'), # Factorial del resultado
+    ('CONST', 1, 'Rb'), # Resultado
+    ('CONST', 4, 'Rc'), # Dirección en donde empieza el bucle
+    ('CONST', 1, 'Rd'), # Límite del bucle
+    ('CONST', 1, 'Rf'), # Decremento
+    ('CMP', '<=', 'Ra', 'Rd', 'Re'), # Comparar y poner el resultado en Re
+    ('MUL', 'Ra', 'Rb', 'Rb'),
+    ('SUB', 'Ra', 'Rf', 'Ra'),
+    ('JZ', 'Rc', 'Re'),
+    ('HALT',)
+]
+
+# Fibonacci
+
+code = [
+    ('CONST', 6, 'Ra'), # Número de la serie = 8
+    ('CONST', 1, 'Rb'), # Primer número de la serie
+    ('CONST', 1, 'Rc'), # Segundo número de la serie
+    ('CONST', 0, 'Rd'), # Resultado
+    ('CONST', 8, 'Re'), # Dirección en donde empieza el bucle
+    ('CONST', 1, 'Rf'), # Contador
+    ('CMP', '>', 'Rb', 'Ra', 'Rf'), # Comparar y poner el resultado en Rf
+    ('ADD', 'Rb', 'Rc', 'Rd'),
+    # Como no tenemos operación para copiar de un registro a otro, usamos la memoria
+    ('CONST', 0, 'Rg'), # Dirección de la memoria para guardar
+    ('STORE', 'Rg', 'Rc', 0),
+    ('LOAD', 'Rg', 'Rb', 0), # Ahora Rb tiene el valor de Rc
+    ('ADD', 'Rb', 'Rc', 'Rc'),
+    ('INC', 'Rf'),
+    ('JZ', 'Re', 'Rf'),
+    ('HALT',) # El resultado está en Rd
+]
+
 
 print(machine.run(code))
