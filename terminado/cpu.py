@@ -102,17 +102,20 @@ class CPU:
 
     def INC(self, arg1):
         self.registers[arg1] += 1
+        print("Incrementando ", arg1, " a ", self.registers[arg1])
 
     def DEC(self, arg1):
         self.registers[arg1] -= 1
 
     def CMP(self, op, arg1, arg2, result):
+        print("Comparando ", self.registers[arg1], " con ", self.registers[arg2], " y guardando en ", result)
         if op == "<":
             self.registers[result] = int(self.registers[arg1] < self.registers[arg2])
         elif op == ">":
             self.registers[result] = int(self.registers[arg1] > self.registers[arg2])
         elif op == "<=":
             self.registers[result] = int(self.registers[arg1] <= self.registers[arg2])
+            print("Resultado: ", self.registers[result])
         elif op == ">=":
             self.registers[result] = int(self.registers[arg1] >= self.registers[arg2])
         elif op == "==":
@@ -136,7 +139,7 @@ class CPU:
     
     def JZ(self, arg1, arg2):
         if not self.registers[arg2]:
-            print("Jumping to ", self.registers[arg1])
+            print("Jumping to ", self.registers[arg1], "Registro:", arg2, "Valor:", self.registers[arg2])
             self.registers["IP"] = self.registers[arg1]
 
     def HALT(self):
@@ -184,20 +187,23 @@ code = [
 
 code = [
     ('CONST', 6, 'Ra'), # Número de la serie = 8
-    ('CONST', 1, 'Rb'), # Primer número de la serie
+    ('CONST', 0, 'Rb'), # Primer número de la serie
     ('CONST', 1, 'Rc'), # Segundo número de la serie
     ('CONST', 0, 'Rd'), # Resultado
-    ('CONST', 8, 'Re'), # Dirección en donde empieza el bucle
+    ('CONST', 7, 'Re'), # Dirección en donde empieza el bucle
     ('CONST', 1, 'Rf'), # Contador
-    ('CMP', '>', 'Rb', 'Ra', 'Rf'), # Comparar y poner el resultado en Rf
+    ('DEC', 'Ra'),
+    ('CMP', '<=', 'Ra', 'Rf', 'Rg'), # Comparar y poner el resultado en Rf
     ('ADD', 'Rb', 'Rc', 'Rd'),
     # Como no tenemos operación para copiar de un registro a otro, usamos la memoria
-    ('CONST', 0, 'Rg'), # Dirección de la memoria para guardar
-    ('STORE', 'Rg', 'Rc', 0),
-    ('LOAD', 'Rg', 'Rb', 0), # Ahora Rb tiene el valor de Rc
-    ('ADD', 'Rb', 'Rc', 'Rc'),
+    ('CONST', 0, 'Rh'), # Dirección de la memoria para guardar
+    ('STORE', 'Rh', 'Rc', 0),
+    ('LOAD', 'Rh', 'Rb', 0), # Ahora Rb tiene el valor de Rc
+    ('STORE', 'Rh', 'Rd', 0),
+    ('LOAD', 'Rh', 'Rc', 0), # Ahora Rb tiene el valor de Rd, para el siguiente ciclo
     ('INC', 'Rf'),
-    ('JZ', 'Re', 'Rf'),
+    # ('HALT',),
+    ('JZ', 'Re', 'Rg'),
     ('HALT',) # El resultado está en Rd
 ]
 
