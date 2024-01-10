@@ -13,11 +13,8 @@
 # ('JMP', 'Rd', offset)  # Mueve el IP a la dirección de memoria
 # ('HALT')
 
-
 class CPU:
     # implementa un CPU muy siempre que ejecute las instrucciones de arriba
-    # 1. Leer el programa
-    # 2. Ejecutar el programa
 
     def run(self, program):
         self.registers = {"Ra": 0, "Rb": 0, "Rc": 0, "Rd": 0}  # 8 registros
